@@ -1,0 +1,75 @@
+name: default
+
+on: [push, pull_request]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: Cache Node.js modules
+        uses: actions/cache@v1
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: cache workspace
+        uses: actions/cache@v1
+        with:
+          path: ${{ github.workspace }}
+          key: ${{ runner.os }}-node-${{ github.sha }}
+
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: restore workspace cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ github.workspace }}
+          key: ${{ runner.os }}-node-${{ github.sha }}
+
+      - name: lint
+        run: npm run lint
+    needs: setup
+
+  audit:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Node.js environment
+        uses: actions/setup-node@v1
+        with:
+          node-version: '12.x'
+
+      - name: checkout
+        uses: actions/checkout@master
+
+      - name: restore workspace cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ github.workspace }}
+          key: ${{ runner.os }}-node-${{ github.sha }}
+
+      - name: audit
+        run: npm audit
+    needs: setup

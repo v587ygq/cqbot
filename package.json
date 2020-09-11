@@ -1,0 +1,40 @@
+{
+  "name": "cqbot",
+  "version": "1.0.0",
+  "description": "A Node.js framework based on cqhttp.",
+  "keywords": [
+    "cqhttp",
+    "nodejs",
+    "qqbot",
+    "websockets"
+  ],
+  "homepage": "https://github.com/v587ygq/cqbot#readme",
+  "bugs": {
+    "url": "https://github.com/v587ygq/cqbot/issues",
+    "email": "support@mail.v587ygq.cn"
+  },
+  "license": "UNLICENSED",
+  "author": "v587ygq",
+  "files": [
+    "src"
+  ],
+  "main": "./src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/v587ygq/cqbot.git"
+  },
+  "scripts": {
+    "lint": "eslint --ext .js --ignore-path .gitignore ."
+  },
+  "engines": {
+    "node": ">=12"
+  },
+  "dependencies": {
+    "lodash.get": "^4.4.2",
+    "nanoid": "^3.1.12",
+    "ws": "^7.3.1"
+  },
+  "devDependencies": {
+    "eslint": "^7.8.1"
+  }
+}
