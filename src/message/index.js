@@ -4,6 +4,7 @@ const image = require('./image')
 const json = require('./json')
 const music = require('./music')
 const musicCustom = require('./musicCustom')
+const poke = require('./poke')
 const record = require('./record')
 const reply = require('./reply')
 const share = require('./share')
@@ -17,6 +18,7 @@ module.exports = {
   json,
   music,
   musicCustom,
+  poke,
   record,
   reply,
   share,

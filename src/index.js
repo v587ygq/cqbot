@@ -5,24 +5,25 @@ const $eventbus = require('./eventbus')
 const message = require('./message')
 
 class CQBot {
-  constructor () {
+  constructor ({
+    timeout = 2000 // API 超时时间，单位毫秒
+  } = {}) {
+    this._timeout = timeout
+
     this._api_sock = new ws.Server({ path: '/api', noServer: true }) // 创建 api socket 实例
     this._event_sock = new ws.Server({ path: '/event', noServer: true }) // 创建 event socket 实例
 
     this._event_bus = new $eventbus(this)
     this._responseHandlers = new Map()
 
-    this._api_sock.on('connection', (ws, req) => {
-      if (req.headers['x-client-role'] === 'API') { this._api_client = ws }
+    this._api_sock.on('connection', (ws, client) => {
+      if (client === 'API') { this._api_client = ws }
       ws.on('message', (msg) => {
         try {
           const context = JSON.parse(msg)
           const onSuccess = this._responseHandlers.get(context.echo.id)
           if (typeof onSuccess === 'function') { onSuccess(context) }
-        } catch (e) {
-          // eslint-disable-next-line no-console
-          console.log(e)
-        }
+        } catch (e) {}
       })
     })
 
@@ -39,7 +40,7 @@ class CQBot {
     server.on('upgrade', (req, socket, head) => {
       if (this._api_sock.shouldHandle(req)) {
         this._api_sock.handleUpgrade(req, socket, head, (ws) => {
-          this._api_sock.emit('connection', ws, req) // 需要传递 req 参数来识别出 cqhttp 客户端
+          this._api_sock.emit('connection', ws, req.headers['x-client-role'])
         })
       } else if (this._event_sock.shouldHandle(req)) {
         this._event_sock.handleUpgrade(req, socket, head, (ws) => {
@@ -51,9 +52,9 @@ class CQBot {
 
   /**
    * 调用 CQ API
-   * @see {@link https://github.com/howmanybots/onebot/tree/master/v11/specs/api}
+   * @see {@link https://cqbot.info/api/}
    * @param {string} action
-   * @param {Object|null} params
+   * @param {Object|undefined} [params=undefined]
    * @returns {Promise}
    */
   call (action, params) {
@@ -73,7 +74,7 @@ class CQBot {
       setTimeout(() => {
         this._responseHandlers.delete(id)
         reject(new Error('time out!'))
-      }, 2000)
+      }, this._timeout)
     })
     return Promise.race([success, failure])
   }
@@ -96,13 +97,13 @@ class CQBot {
           case 'private':
             switch (msg.sub_type) {
               case 'friend':
-                this._event_bus.emit('message.private.friend', msg)
+                this._event_bus.emit('message.private.friend', msg, { quick_action: true })
                 break
               case 'group':
-                this._event_bus.emit('message.private.group', msg)
+                this._event_bus.emit('message.private.group', msg, { quick_action: true })
                 break
               case 'other':
-                this._event_bus.emit('message.private.other', msg)
+                this._event_bus.emit('message.private.other', msg, { quick_action: true })
                 break
               default:
                 break
@@ -111,13 +112,13 @@ class CQBot {
           case 'group':
             switch (msg.sub_type) {
               case 'normal':
-                this._event_bus.emit('message.group.normal', msg)
+                this._event_bus.emit('message.group.normal', msg, { quick_action: true })
                 break
               case 'anonymous':
-                this._event_bus.emit('message.group.anonymous', msg)
+                this._event_bus.emit('message.group.anonymous', msg, { quick_action: true })
                 break
               case 'notice':
-                this._event_bus.emit('message.group.notice', msg)
+                this._event_bus.emit('message.group.notice', msg, { quick_action: true })
                 break
               default:
                 break

@@ -1,6 +1,6 @@
 /**
  * 构造链接分享 (CQ:share) 消息段
- * @see {@link https://github.com/howmanybots/onebot/blob/master/v11/specs/message/segment.md#%E9%93%BE%E6%8E%A5%E5%88%86%E4%BA%AB}
+ * @see {@link https://cqbot.info/cqcode/share}
  * @param {string} url URL
  * @param {string} title 标题
  * @param {string} [content=undefined] 内容描述（可选）

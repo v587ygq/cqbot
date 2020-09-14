@@ -1,7 +1,7 @@
 const $get = require('lodash.get')
 
 module.exports = class Eventbus {
-  constructor () {
+  constructor (cqbot) {
     this._eventMap = {
       message: {
         '': [],
@@ -60,6 +60,8 @@ module.exports = class Eventbus {
         heartbeat: [] // 心跳
       } // 元事件
     }
+
+    this._cqbot = cqbot
   }
 
   _getHandlerQueue (eventType) {
@@ -72,22 +74,23 @@ module.exports = class Eventbus {
   }
 
   /**
-   * @param {string} eventType
-   * @param {function} handler
+   * @param {string} eventType 事件类型
+   * @param {function} cb 回调函数
    */
-  on (eventType, handler) {
+  on (eventType, cb) {
     const queue = this._getHandlerQueue(eventType)
     if (queue) {
-      queue.push(handler)
+      queue.push(cb)
     }
   }
 
   /**
    * 上报事件并执行所有监听该事件的回调
-   * @param {string} eventType
-   * @param args
+   * @param {string} eventType 事件类型
+   * @param {object} msg 事件数据对象
+   * @param {object|undefined} [extra=undefined] 额外参数
    */
-  async emit (eventType, ...args) {
+  async emit (eventType, msg, extra) {
     const queue = []
     for (let hierarchy = eventType.split('.'); hierarchy.length > 0; hierarchy.pop()) {
       const currentQueue = this._getHandlerQueue(hierarchy.join('.'))
@@ -96,9 +99,17 @@ module.exports = class Eventbus {
       }
     }
 
-    if (queue && queue.length > 0) {
+    // 判断该事件是否可以快速操作
+    if (extra && extra.quick_action) {
       for (const handler of queue) {
-        await handler(...args)
+        const result = await handler(msg, extra)
+        if (typeof result === 'object') {
+          this._cqbot.call('.handle_quick_operation', { context: msg, operation: result })
+        }
+      }
+    } else {
+      for (const handler of queue) {
+        await handler(msg, extra)
       }
     }
   }
