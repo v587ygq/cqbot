@@ -1,7 +1,7 @@
 ---
 title: '处理加好友请求'
 description: ''
-position: 27
+position: 301
 category: 'API'
 menuTitle: 'set_friend_add_request'
 ---

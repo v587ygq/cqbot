@@ -1,7 +1,7 @@
 ---
 title: '群解除禁言'
 description: ''
-position: 51
+position: 401
 category: '事件'
 menuTitle: 'notice.group_ban.lift_ban'
 ---

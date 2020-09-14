@@ -1,7 +1,7 @@
 ---
 title: '群组踢人'
 description: ''
-position: 31
+position: 301
 category: 'API'
 menuTitle: 'set_group_kick'
 ---

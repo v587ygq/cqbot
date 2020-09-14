@@ -1,7 +1,7 @@
 ---
 title: '管理员已同意入群'
 description: ''
-position: 48
+position: 401
 category: '事件'
 menuTitle: 'notice.group_increase.approve'
 ---

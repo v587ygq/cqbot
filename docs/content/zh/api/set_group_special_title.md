@@ -1,7 +1,7 @@
 ---
 title: '设置群组专属头衔'
 description: ''
-position: 34
+position: 301
 category: 'API'
 menuTitle: 'set_group_special_title'
 ---

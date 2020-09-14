@@ -1,7 +1,7 @@
 ---
 title: '群组全员禁言'
 description: ''
-position: 35
+position: 301
 category: 'API'
 menuTitle: 'set_group_whole_ban'
 ---

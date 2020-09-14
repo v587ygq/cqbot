@@ -1,7 +1,7 @@
 ---
 title: '机器人被踢出群组'
 description: ''
-position: 47
+position: 401
 category: '事件'
 menuTitle: 'notice.group_decrease.kick_me'
 ---

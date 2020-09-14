@@ -1,7 +1,7 @@
 ---
 title: '设置群组名'
 description: ''
-position: 33
+position: 301
 category: 'API'
 menuTitle: 'set_group_name'
 ---

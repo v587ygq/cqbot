@@ -1,7 +1,7 @@
 ---
 title: '群禁言'
 description: ''
-position: 50
+position: 401
 category: '事件'
 menuTitle: 'notice.group_ban.ban'
 ---

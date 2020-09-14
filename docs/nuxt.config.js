@@ -10,5 +10,8 @@ export default theme({
       name: '中文'
     }],
     defaultLocale: 'zh'
-  }
+  },
+  modules: [
+    '@nuxtjs/pwa'
+  ]
 })

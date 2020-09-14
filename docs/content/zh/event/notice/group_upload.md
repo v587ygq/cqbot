@@ -1,7 +1,7 @@
 ---
 title: '群文件上传'
 description: ''
-position: 42
+position: 401
 category: '事件'
 menuTitle: 'notice.group_upload'
 ---

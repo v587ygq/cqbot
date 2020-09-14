@@ -1,7 +1,7 @@
 ---
 title: '获取图片信息'
 description: ''
-position: 22
+position: 301
 category: 'API'
 menuTitle: 'get_image'
 ---

@@ -1,7 +1,7 @@
 ---
 title: '群成员被踢出群组'
 description: ''
-position: 46
+position: 401
 category: '事件'
 menuTitle: 'notice.group_decrease.kick'
 ---

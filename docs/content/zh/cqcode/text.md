@@ -1,7 +1,7 @@
 ---
 title: '纯文本'
 description: ''
-position: 12
+position: 201
 category: 'CQ 码'
 menuTitle: 'text'
 ---

@@ -1,7 +1,7 @@
 ---
 title: '获取登录号信息'
 description: ''
-position: 23
+position: 301
 category: 'API'
 menuTitle: 'get_login_info'
 ---

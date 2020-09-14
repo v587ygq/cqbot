@@ -1,7 +1,7 @@
 ---
 title: '管理员邀请入群'
 description: ''
-position: 49
+position: 401
 category: '事件'
 menuTitle: 'notice.group_increase.invite'
 ---

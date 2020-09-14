@@ -1,7 +1,7 @@
 ---
 title: '取消管理员'
 description: ''
-position: 44
+position: 401
 category: '事件'
 menuTitle: 'notice.group_admin.unset'
 ---

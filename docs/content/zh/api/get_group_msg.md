@@ -1,7 +1,7 @@
 ---
 title: '获取群消息'
 description: ''
-position: 21
+position: 301
 category: 'API'
 menuTitle: 'get_group_msg'
 ---

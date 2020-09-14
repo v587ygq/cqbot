@@ -1,7 +1,7 @@
 ---
 title: '获取群列表'
 description: ''
-position: 18
+position: 301
 category: 'API'
 menuTitle: 'get_group_list'
 ---

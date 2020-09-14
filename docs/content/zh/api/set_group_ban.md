@@ -1,7 +1,7 @@
 ---
 title: '群组单人禁言'
 description: ''
-position: 29
+position: 301
 category: 'API'
 menuTitle: 'set_group_ban'
 ---

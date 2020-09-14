@@ -1,7 +1,7 @@
 ---
 title: '群消息撤回'
 description: ''
-position: 52
+position: 401
 category: '事件'
 menuTitle: 'notice.group_recall'
 ---

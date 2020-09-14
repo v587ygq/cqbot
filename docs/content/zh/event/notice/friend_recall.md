@@ -1,7 +1,7 @@
 ---
 title: '好友消息撤回'
 description: ''
-position: 53
+position: 401
 category: '事件'
 menuTitle: 'notice.friend_recall'
 ---

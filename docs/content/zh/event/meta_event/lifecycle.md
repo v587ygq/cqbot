@@ -1,7 +1,7 @@
 ---
 title: '生命周期'
 description: ''
-position: 57
+position: 401
 category: '事件'
 menuTitle: 'meta_event.lifecycle'
 ---

@@ -1,7 +1,7 @@
 ---
 title: '撤回信息'
 description: ''
-position: 15
+position: 301
 category: 'API'
 menuTitle: 'delete_msg'
 ---

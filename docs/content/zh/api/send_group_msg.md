@@ -1,7 +1,7 @@
 ---
 title: '发送群消息'
 description: ''
-position: 24
+position: 301
 category: 'API'
 menuTitle: 'send_group_msg'
 ---

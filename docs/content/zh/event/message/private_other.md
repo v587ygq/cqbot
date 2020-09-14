@@ -1,7 +1,7 @@
 ---
 title: '其他私聊'
 description: ''
-position: 38
+position: 401
 category: '事件'
 menuTitle: 'message.private.other'
 ---
@@ -34,3 +34,10 @@ menuTitle: 'message.private.other'
 | `nickname` | string | | 昵称 |
 | `sex` | string | `male` `female` `unknown` | 性别 |
 | `age` | number (int32) | | 年龄 |
+
+## 快速操作
+
+| 字段名 | 数据类型 | 默认 | 说明 |
+| :---: | :---: | :---: | :---: |
+| `reply` | message | | 要回复的内容 |
+| `auto_escape` | boolean | `false` | 消息内容是否作为纯文本发送 |

@@ -1,7 +1,7 @@
 ---
 title: '设置管理员'
 description: ''
-position: 43
+position: 401
 category: '事件'
 menuTitle: 'notice.group_admin.set'
 ---

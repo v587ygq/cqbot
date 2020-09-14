@@ -1,7 +1,7 @@
 ---
 title: '退出群组'
 description: ''
-position: 32
+position: 301
 category: 'API'
 menuTitle: 'set_group_leave'
 ---

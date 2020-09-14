@@ -1,7 +1,7 @@
 ---
 title: '获取好友列表'
 description: ''
-position: 16
+position: 301
 category: 'API'
 menuTitle: 'get_friend_list'
 ---

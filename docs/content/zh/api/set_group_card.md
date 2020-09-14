@@ -1,7 +1,7 @@
 ---
 title: '设置群名片（群备注）'
 description: ''
-position: 30
+position: 301
 category: 'API'
 menuTitle: 'set_group_card'
 ---

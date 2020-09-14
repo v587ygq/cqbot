@@ -1,7 +1,7 @@
 ---
 title: '处理加群请求/邀请'
 description: ''
-position: 28
+position: 301
 category: 'API'
 menuTitle: 'set_group_add_request'
 ---

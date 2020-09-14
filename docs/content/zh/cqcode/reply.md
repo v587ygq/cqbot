@@ -1,7 +1,7 @@
 ---
 title: '回复'
 description: ''
-position: 10
+position: 201
 category: 'CQ 码'
 menuTitle: 'reply'
 ---

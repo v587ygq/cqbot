@@ -1,7 +1,7 @@
 ---
 title: '群内匿名聊天'
 description: ''
-position: 40
+position: 401
 category: '事件'
 menuTitle: 'message.group.anonymous'
 ---
@@ -53,3 +53,15 @@ menuTitle: 'message.group.anonymous'
 | `level` | string | | 成员等级 |
 | `role` | string | `owner` `admin` `member` | 角色 |
 | `title` | string | | 专属头衔 |
+
+## 快速操作
+
+| 字段名 | 数据类型 | 默认 | 说明 |
+| :---: | :---: | :---: | :---: |
+| `reply` | message | | 要回复的内容 |
+| `auto_escape` | boolean | `false` | 消息内容是否作为纯文本发送 |
+| `at_sender` | boolean | `true` | 是否要在回复开头 at 发送者 |
+| `delete` | boolean | `false` | 撤回该条消息 |
+| `kick` | boolean | `false` | 把发送者踢出群组（需要登录号权限足够），**不拒绝**此人后续加群请求，发送者是匿名用户时无效 |
+| `ban` | boolean | `false` | 把发送者禁言，对匿名用户也有效 |
+| `ban_duration` | number | `30` | 禁言时长 |

@@ -1,7 +1,7 @@
 ---
 title: '发送私聊消息'
 description: ''
-position: 26
+position: 301
 category: 'API'
 menuTitle: 'send_private_msg'
 ---

@@ -1,7 +1,7 @@
 ---
 title: '发送消息'
 description: ''
-position: 25
+position: 301
 category: 'API'
 menuTitle: 'send_msg'
 ---
