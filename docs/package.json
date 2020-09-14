@@ -2,7 +2,7 @@
   "name": "docs",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "dev": "nuxt --port 4000",
     "generate": "nuxt generate"
   },
   "dependencies": {

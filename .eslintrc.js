@@ -1,30 +1,16 @@
 module.exports = {
+  root: true,
   env: {
     browser: true,
-    commonjs: true,
-    es2021: true
+    node: true
   },
-  extends: 'eslint:recommended',
   parserOptions: {
-    ecmaVersion: 12
+    parser: 'babel-eslint'
   },
-  rules: {
-    indent: [
-      'error',
-      2,
-      { SwitchCase: 1 }
-    ],
-    'linebreak-style': [
-      'error',
-      'unix'
-    ],
-    quotes: [
-      'error',
-      'single'
-    ],
-    semi: [
-      'error',
-      'never'
-    ]
-  }
+  extends: [
+    '@nuxtjs',
+    'plugin:nuxt/recommended'
+  ],
+  // add your custom rules here
+  rules: {}
 }

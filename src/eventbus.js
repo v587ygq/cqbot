@@ -5,13 +5,17 @@ module.exports = class Eventbus {
     this._eventMap = {
       message: {
         '': [],
-        private: [], // 私聊消息
+        private: {
+          '': [],
+          friend: [], // 好友
+          group: [], // 群临时会话
+          other: [] // 其他
+        }, // 私聊消息
         group: {
           '': [],
-          '@': {
-            '': [],
-            me: []
-          }
+          normal: [], // 正常消息
+          anonymous: [], // 匿名消息
+          notice: [] // 通知消息
         } // 群消息
       }, // 消息事件
       notice: {

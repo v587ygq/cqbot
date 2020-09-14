@@ -2,8 +2,9 @@ const { nanoid } = require('nanoid')
 const ws = require('ws')
 
 const $eventbus = require('./eventbus')
+const message = require('./message')
 
-module.exports = class CQWebSocket {
+class CQBot {
   constructor () {
     this._api_sock = new ws.Server({ path: '/api', noServer: true }) // 创建 api socket 实例
     this._event_sock = new ws.Server({ path: '/event', noServer: true }) // 创建 event socket 实例
@@ -14,10 +15,13 @@ module.exports = class CQWebSocket {
     this._api_sock.on('connection', (ws, req) => {
       if (req.headers['x-client-role'] === 'API') { this._api_client = ws }
       ws.on('message', (msg) => {
-        const context = JSON.parse(msg)
-        const onSuccess = this._responseHandlers.get(context.echo.id)
-        if (typeof onSuccess === 'function') {
-          onSuccess(context)
+        try {
+          const context = JSON.parse(msg)
+          const onSuccess = this._responseHandlers.get(context.echo.id)
+          if (typeof onSuccess === 'function') { onSuccess(context) }
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.log(e)
         }
       })
     })
@@ -69,7 +73,7 @@ module.exports = class CQWebSocket {
       setTimeout(() => {
         this._responseHandlers.delete(id)
         reject(new Error('time out!'))
-      }, 3000)
+      }, 2000)
     })
     return Promise.race([success, failure])
   }
@@ -90,10 +94,34 @@ module.exports = class CQWebSocket {
       case 'message':
         switch (msg.message_type) {
           case 'private':
-            this._event_bus.emit('message.private', msg)
+            switch (msg.sub_type) {
+              case 'friend':
+                this._event_bus.emit('message.private.friend', msg)
+                break
+              case 'group':
+                this._event_bus.emit('message.private.group', msg)
+                break
+              case 'other':
+                this._event_bus.emit('message.private.other', msg)
+                break
+              default:
+                break
+            }
             break
           case 'group':
-            this._event_bus.emit('message.group', msg)
+            switch (msg.sub_type) {
+              case 'normal':
+                this._event_bus.emit('message.group.normal', msg)
+                break
+              case 'anonymous':
+                this._event_bus.emit('message.group.anonymous', msg)
+                break
+              case 'notice':
+                this._event_bus.emit('message.group.notice', msg)
+                break
+              default:
+                break
+            }
             break
           default:
             break
@@ -202,4 +230,9 @@ module.exports = class CQWebSocket {
         break
     }
   }
+}
+
+module.exports = {
+  CQBot,
+  ...message
 }
