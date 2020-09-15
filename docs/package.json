@@ -3,7 +3,7 @@
   "description": "A Node.js framework based on cqhttp.",
   "private": true,
   "scripts": {
-    "dev": "nuxt --port 4000",
+    "dev": "nuxt",
     "generate": "nuxt generate"
   },
   "dependencies": {

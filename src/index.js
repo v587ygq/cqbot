@@ -23,7 +23,9 @@ class CQBot {
           const context = JSON.parse(msg)
           const onSuccess = this._responseHandlers.get(context.echo.id)
           if (typeof onSuccess === 'function') { onSuccess(context) }
-        } catch (e) {}
+        } catch (e) {
+          // 错误处理
+        }
       })
     })
 

@@ -24,7 +24,7 @@
     "url": "https://github.com/v587ygq/cqbot.git"
   },
   "scripts": {
-    "lint": "eslint --ext .js --ignore-path .gitignore src"
+    "lint": "eslint ."
   },
   "engines": {
     "node": ">=12"
@@ -35,6 +35,6 @@
     "ws": "^7.3.1"
   },
   "devDependencies": {
-    "eslint": "^7.8.1"
+    "eslint": "^7.9.0"
   }
 }
