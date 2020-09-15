@@ -1,10 +1,30 @@
-# cqbot
+# CQBot
 
-## 关于
+![GitHub All Releases](https://cqbot.info/logo.png)
 
----
-基于 cqhttp 协议实现的 nodejs 框架，封装了 cqhttp 中的 api 请求和事件响应。
-> 该框架目前处于测试阶段。
+## 介绍
+
+基于 cqhttp 客户端的 nodejs 开发框架。
+
+## 安装
+
+```
+npm install cqbot
+```
+
+## 使用
+
+```js
+const server = require('http').createServer()
+
+const { CQBot } = require('cqbot')
+const cqbot = new CQBot()
+cqbot.start(server)
+
+server.listen(3000)
+```
+
+具体请参考[文档](https://cqbot.info)
 
 ## 参考
 
