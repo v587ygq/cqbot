@@ -11,7 +11,7 @@ export default theme({
     }],
     defaultLocale: 'zh'
   },
-  modules: [
-    '@nuxtjs/pwa'
-  ]
+  googleFonts: {
+    display: 'swap'
+  }
 })
