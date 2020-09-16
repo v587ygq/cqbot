@@ -104,7 +104,10 @@ module.exports = class Eventbus {
       for (const handler of queue) {
         const result = await handler(msg, extra)
         if (typeof result === 'object') {
-          this._cqbot.call('.handle_quick_operation', { context: msg, operation: result })
+          this._cqbot.call('.handle_quick_operation', { context: msg, operation: result.data })
+            // 如果参数中含有回调则执行
+            .then(msg => result.success && result.success(msg))
+            .catch(e => result.failure && result.failure(e))
         }
       }
     } else {

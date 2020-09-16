@@ -18,16 +18,69 @@ cqbot.start(server)
 server.listen(3000)
 ```
 
+<alert>
+
+修改 CQ 客户端部分配置：
+
+</alert>
+
+```json
+"ws_reverse_servers": [
+	{
+		"enabled": true,
+		"reverse_url": "",
+		"reverse_api_url": "ws://localhost:3000/api",
+		"reverse_event_url": "ws://localhost:3000/event",
+		"reverse_reconnect_interval": 3000
+	}
+]
+```
+
 ## 调用 API
 
 ```js
-cqbot.call()
-  .then(() => {})
-  .catch(() => {})
+cqbot.call(action, params)
+  .then((msg) => {})
+  .catch((e) => {})
 ```
+
+需要传入的参数：
+
+| 字段名 | 数据类型 | 说明 |
+| :---: | :---: | :---: |
+| `action` | string | API 操作，请参考[API 总览](/api) |
+| `params` | object | API 操作需要传入的参数 |
 
 ## 监听事件
 
 ```js
-cqbot.on()
+cqbot.on(eventType, cb)
 ```
+
+需要传入的参数：
+
+| 字段名 | 数据类型 | 说明 |
+| :---: | :---: | :---: |
+| `eventType` | string | 需要监听的事件类型，请参考[事件总览](/event) |
+| `cb` | function | 回调函数 |
+
+## 快速操作
+
+```js
+cqbot.on(eventType, cb)
+```
+
+需要传入的参数：
+
+| 字段名 | 数据类型 | 说明 |
+| :---: | :---: | :---: |
+| `eventType` | string | 允许快速操作的事件类型 |
+| `cb` | function | 回调函数，**需要返回一个对象** |
+
+`cb` 返回的对象格式
+
+| 字段名 | 数据类型 | 说明 |
+| :---: | :---: | :---: |
+| `data` | object | 需要执行的快速操作 |
+| `success` | function | 成功回调函数（可选） |
+| `failure` | function | 失败回调函数（可选） |

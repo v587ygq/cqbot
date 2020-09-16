@@ -6,8 +6,10 @@ const message = require('./message')
 
 class CQBot {
   constructor ({
-    timeout = 2000 // API 超时时间，单位毫秒
+    access_token = null, // access_token 用于身份验证
+    timeout = 5000 // API 超时时间，单位毫秒
   } = {}) {
+    this._access_token = access_token
     this._timeout = timeout
 
     this._api_sock = new ws.Server({ path: '/api', noServer: true }) // 创建 api socket 实例
@@ -16,8 +18,8 @@ class CQBot {
     this._event_bus = new $eventbus(this)
     this._responseHandlers = new Map()
 
-    this._api_sock.on('connection', (ws, client) => {
-      if (client === 'API') { this._api_client = ws }
+    this._api_sock.on('connection', (ws) => {
+      this._api_client = ws
       ws.on('message', (msg) => {
         try {
           const context = JSON.parse(msg)
@@ -40,14 +42,16 @@ class CQBot {
    */
   start (server) {
     server.on('upgrade', (req, socket, head) => {
-      if (this._api_sock.shouldHandle(req)) {
-        this._api_sock.handleUpgrade(req, socket, head, (ws) => {
-          this._api_sock.emit('connection', ws, req.headers['x-client-role'])
-        })
-      } else if (this._event_sock.shouldHandle(req)) {
-        this._event_sock.handleUpgrade(req, socket, head, (ws) => {
-          this._event_sock.emit('connection', ws)
-        })
+      if (!this._access_token || req.headers.authorization === `Token ${this._access_token}`) { // 鉴权
+        if (this._api_sock.shouldHandle(req)) {
+          this._api_sock.handleUpgrade(req, socket, head, (ws) => {
+            this._api_sock.emit('connection', ws)
+          })
+        } else if (this._event_sock.shouldHandle(req)) {
+          this._event_sock.handleUpgrade(req, socket, head, (ws) => {
+            this._event_sock.emit('connection', ws)
+          })
+        }
       }
     })
   }
@@ -55,8 +59,8 @@ class CQBot {
   /**
    * 调用 CQ API
    * @see {@link https://cqbot.info/api/}
-   * @param {string} action
-   * @param {Object|undefined} [params=undefined]
+   * @param {string} action 动作
+   * @param {Object|undefined} [params=undefined] 动作所需的参数
    * @returns {Promise}
    */
   call (action, params) {
