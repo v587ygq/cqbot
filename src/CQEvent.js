@@ -63,7 +63,14 @@ module.exports = class Eventbus {
     }
   }
 
-  _getHandlerQueue (type) { return $get(this._eventType, `${type}.`) || $get(this._eventType, type) }
+  /**
+   * 获取某个事件监听列表
+   * @param {string} type 事件类型
+   * @returns {Array}
+   */
+  _getlisteners (type) {
+    return $get(this._eventType, `${type}.`) || $get(this._eventType, type)
+  }
 
   /**
    * 监听事件
@@ -71,7 +78,7 @@ module.exports = class Eventbus {
    * @param {function} cb 回调函数
    */
   on (type, cb) {
-    const queue = this._getHandlerQueue(type)
+    const queue = this._getlisteners(type)
     if (queue) {
       queue.push(cb)
     }
@@ -96,7 +103,7 @@ module.exports = class Eventbus {
    * @param {function} cb 回调函数
    */
   off (type, cb) {
-    const queue = this._getHandlerQueue(type)
+    const queue = this._getlisteners(type)
     if (queue) {
       const index = queue.indexOf(cb)
       if (index > -1) {
@@ -114,7 +121,7 @@ module.exports = class Eventbus {
   async emit (type, msg, extra) {
     const queue = []
     for (let hierarchy = type.split('.'); hierarchy.length > 0; hierarchy.pop()) {
-      const currentQueue = this._getHandlerQueue(hierarchy.join('.'))
+      const currentQueue = this._getlisteners(hierarchy.join('.'))
       if (currentQueue && currentQueue.length > 0) {
         queue.push(...currentQueue)
       }
