@@ -74,6 +74,7 @@ module.exports = {
     'object-curly-spacing': [2, 'always'],
     'object-shorthand': 2,
     'padded-blocks': [2, 'never'],
+    'padding-line-between-statements': [2, { blankLine: 'always', prev: '*', next: 'return' }],
     'prefer-arrow-callback': 2,
     'prefer-const': 2,
     'prefer-promise-reject-errors': 2,

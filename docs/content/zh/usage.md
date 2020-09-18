@@ -54,33 +54,24 @@ cqbot.call(action, params)
 ## 监听事件
 
 ```js
-cqbot.on(eventType, cb)
+cqbot.on(type, cb)
 ```
 
 需要传入的参数：
 
 | 字段名 | 数据类型 | 说明 |
 | :---: | :---: | :---: |
-| `eventType` | string | 需要监听的事件类型，请参考[事件总览](/event) |
+| `type` | string | 需要监听的事件类型，请参考[事件总览](/event) |
 | `cb` | function | 回调函数 |
 
 ## 快速操作
 
 ```js
-cqbot.on(eventType, cb)
+cqbot.on('type', msg => msg.$send(data))
 ```
 
-需要传入的参数：
+<alert>
 
-| 字段名 | 数据类型 | 说明 |
-| :---: | :---: | :---: |
-| `eventType` | string | 允许快速操作的事件类型 |
-| `cb` | function | 回调函数，**需要返回一个对象** |
+`data` 你想要快速返回的数据对象
 
-`cb` 返回的对象格式
-
-| 字段名 | 数据类型 | 说明 |
-| :---: | :---: | :---: |
-| `data` | object | 需要执行的快速操作 |
-| `success` | function | 成功回调函数（可选） |
-| `failure` | function | 失败回调函数（可选） |
+</alert>

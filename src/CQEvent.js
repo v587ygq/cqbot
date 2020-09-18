@@ -2,7 +2,8 @@ const $get = require('lodash.get')
 
 module.exports = class Eventbus {
   constructor (cqbot) {
-    this._eventMap = {
+    this._cqbot = cqbot
+    this._eventType = {
       message: {
         '': [],
         private: {
@@ -60,60 +61,72 @@ module.exports = class Eventbus {
         heartbeat: [] // 心跳
       } // 元事件
     }
-
-    this._cqbot = cqbot
   }
 
-  _getHandlerQueue (eventType) {
-    let queue = $get(this._eventMap, eventType)
-    if (Array.isArray(queue)) {
-      return queue
-    }
-    queue = $get(this._eventMap, `${eventType}.`)
-    return Array.isArray(queue) ? queue : undefined
-  }
+  _getHandlerQueue (type) { return $get(this._eventType, `${type}.`) || $get(this._eventType, type) }
 
   /**
-   * @param {string} eventType 事件类型
+   * 监听事件
+   * @param {string} type 事件类型
    * @param {function} cb 回调函数
    */
-  on (eventType, cb) {
-    const queue = this._getHandlerQueue(eventType)
+  on (type, cb) {
+    const queue = this._getHandlerQueue(type)
     if (queue) {
       queue.push(cb)
     }
   }
 
   /**
+   * 监听事件（一次性）
+   * @param {string} type 事件类型
+   * @param {function} cb 回调函数
+   */
+  once (type, cb) {
+    const func = (msg) => {
+      cb(msg)
+      this.off(type, func)
+    }
+    this.on(type, func)
+  }
+
+  /**
+   * 取消监听事件
+   * @param {string} type 事件类型
+   * @param {function} cb 回调函数
+   */
+  off (type, cb) {
+    const queue = this._getHandlerQueue(type)
+    if (queue) {
+      const index = queue.indexOf(cb)
+      if (index > -1) {
+        queue.splice(index, 1)
+      }
+    }
+  }
+
+  /**
    * 上报事件并执行所有监听该事件的回调
-   * @param {string} eventType 事件类型
+   * @param {string} type 事件类型
    * @param {object} msg 事件数据对象
    * @param {object|undefined} [extra=undefined] 额外参数
    */
-  async emit (eventType, msg, extra) {
+  async emit (type, msg, extra) {
     const queue = []
-    for (let hierarchy = eventType.split('.'); hierarchy.length > 0; hierarchy.pop()) {
+    for (let hierarchy = type.split('.'); hierarchy.length > 0; hierarchy.pop()) {
       const currentQueue = this._getHandlerQueue(hierarchy.join('.'))
       if (currentQueue && currentQueue.length > 0) {
         queue.push(...currentQueue)
       }
     }
 
-    // 判断该事件是否可以快速操作
-    if (extra && extra.quick_action) {
-      for (const handler of queue) {
-        const result = await handler(msg, extra)
-        if (typeof result === 'object') {
-          this._cqbot.call('.handle_quick_operation', { context: msg, operation: result.data })
-            // 如果参数中含有回调则执行
-            .then(msg => result.success && result.success(msg))
-            .catch(e => result.failure && result.failure(e))
-        }
-      }
-    } else {
-      for (const handler of queue) {
-        await handler(msg, extra)
-      }
+    // 判断事件是否可以快速操作
+    if (extra && extra.quick) {
+      msg.$send = (data) => this._cqbot.call('.handle_quick_operation', { context: msg, operation: data })
+    }
+
+    for (const handler of queue) {
+      await handler(msg)
     }
   }
 }
