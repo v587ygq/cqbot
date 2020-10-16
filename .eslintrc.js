@@ -12,6 +12,7 @@ module.exports = {
   // add your custom rules here
   rules: {
     'array-bracket-spacing': [2, 'never'],
+    'arrow-parens': [2, 'as-needed'],
     'arrow-spacing': 2,
     'block-spacing': 2,
     'brace-style': [2, '1tbs', { allowSingleLine: true }],

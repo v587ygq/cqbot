@@ -14,19 +14,20 @@ class CQBot {
     this._apiServer = new ws.Server({ path: '/api', noServer: true }) // 创建 api socket 实例
     this._eventServer = new ws.Server({ path: '/event', noServer: true }) // 创建 event socket 实例
 
-    this._emitter = new CQEvent(this)
+    this._emitter = new CQEvent(this) // CQ 事件类
     this._callbackMap = new Map() // 存储回调函数
 
-    this._apiServer.on('connection', (ws) => {
+    this._apiServer.on('connection', ws => {
       this._apiClient = ws
-      ws.on('message', (msg) => {
+      ws.on('message', msg => {
         const context = JSON.parse(msg)
-        this._callbackMap.get(context.echo.id)(context)
+        const onSuccess = this._callbackMap.get(context.echo.id)
+        if (typeof onSuccess === 'function') { onSuccess(context) }
       })
     })
 
-    this._eventServer.on('connection', (ws) => {
-      ws.on('message', (msg) => { this._eventEmit(JSON.parse(msg)) })
+    this._eventServer.on('connection', ws => {
+      ws.on('message', msg => { this._emitter.eventEmit(JSON.parse(msg)) })
     })
   }
 
@@ -38,11 +39,11 @@ class CQBot {
     server.on('upgrade', (req, socket, head) => {
       if (!this._token || req.headers.authorization === `Token ${this._token}`) { // 鉴权
         if (this._apiServer.shouldHandle(req) && req.headers['x-client-role'] === 'API') {
-          this._apiServer.handleUpgrade(req, socket, head, (ws) => {
+          this._apiServer.handleUpgrade(req, socket, head, ws => {
             this._apiServer.emit('connection', ws)
           })
         } else if (this._eventServer.shouldHandle(req) && req.headers['x-client-role'] === 'Event') {
-          this._eventServer.handleUpgrade(req, socket, head, (ws) => {
+          this._eventServer.handleUpgrade(req, socket, head, ws => {
             this._eventServer.emit('connection', ws)
           })
         }
@@ -63,8 +64,8 @@ class CQBot {
     const id = nanoid(7) // 新建请求 ID
     this._apiClient.send(JSON.stringify({ action, params, echo: { id } })) // 发送 API 指令
 
-    const success = new Promise((resolve) => {
-      this._callbackMap.set(id, (ctx) => {
+    const success = new Promise(resolve => {
+      this._callbackMap.set(id, ctx => {
         this._callbackMap.delete(id)
         delete ctx.echo
         resolve(ctx)
@@ -101,152 +102,6 @@ class CQBot {
    * @param {function} cb 回调函数
    */
   off (type, cb) { this._emitter.off(type, cb) }
-
-  /**
-   * CQ 事件上报
-   * @param {Object} msg
-   */
-  _eventEmit (msg) {
-    switch (msg.post_type) {
-      case 'message':
-        switch (msg.message_type) {
-          case 'private':
-            switch (msg.sub_type) {
-              case 'friend':
-                this._emitter.emit('message.private.friend', msg, { quick: true })
-                break
-              case 'group':
-                this._emitter.emit('message.private.group', msg, { quick: true })
-                break
-              case 'other':
-                this._emitter.emit('message.private.other', msg, { quick: true })
-                break
-              default:
-                break
-            }
-            break
-          case 'group':
-            switch (msg.sub_type) {
-              case 'normal':
-                this._emitter.emit('message.group.normal', msg, { quick: true })
-                break
-              case 'anonymous':
-                this._emitter.emit('message.group.anonymous', msg, { quick: true })
-                break
-              case 'notice':
-                this._emitter.emit('message.group.notice', msg, { quick: true })
-                break
-              default:
-                break
-            }
-            break
-          default:
-            break
-        }
-        break
-      case 'notice':
-        switch (msg.notice_type) {
-          case 'group_upload':
-            this._emitter.emit('notice.group_upload', msg)
-            break
-          case 'group_admin':
-            switch (msg.sub_type) {
-              case 'set':
-                this._emitter.emit('notice.group_admin.set', msg)
-                break
-              case 'unset':
-                this._emitter.emit('notice.group_admin.unset', msg)
-                break
-              default:
-                break
-            }
-            break
-          case 'group_decrease':
-            switch (msg.sub_type) {
-              case 'leave':
-                this._emitter.emit('notice.group_decrease.leave', msg)
-                break
-              case 'kick':
-                this._emitter.emit('notice.group_decrease.kick', msg)
-                break
-              case 'kick_me':
-                this._emitter.emit('notice.group_decrease.kick_me', msg)
-                break
-              default:
-                break
-            }
-            break
-          case 'group_increase':
-            switch (msg.sub_type) {
-              case 'approve':
-                this._emitter.emit('notice.group_increase.approve', msg)
-                break
-              case 'invite':
-                this._emitter.emit('notice.group_increase.invite', msg)
-                break
-              default:
-                break
-            }
-            break
-          case 'group_ban':
-            switch (msg.sub_type) {
-              case 'ban':
-                this._emitter.emit('notice.group_ban.ban', msg)
-                break
-              case 'lift_ban':
-                this._emitter.emit('notice.group_ban.lift_ban', msg)
-                break
-              default:
-                break
-            }
-            break
-          case 'group_recall':
-            this._emitter.emit('notice.group_recall', msg)
-            break
-          case 'friend_recall':
-            this._emitter.emit('notice.friend_recall', msg)
-            break
-          default:
-            break
-        }
-        break
-      case 'request':
-        switch (msg.request_type) {
-          case 'friend':
-            this._emitter.emit('request.friend', msg, { quick: true })
-            break
-          case 'group':
-            switch (msg.sub_type) {
-              case 'add':
-                this._emitter.emit('request.group.add', msg, { quick: true })
-                break
-              case 'invite':
-                this._emitter.emit('request.group.invite', msg, { quick: true })
-                break
-              default:
-                break
-            }
-            break
-          default:
-            break
-        }
-        break
-      case 'meta_event':
-        switch (msg.meta_event_type) {
-          case 'lifecycle':
-            this._emitter.emit('meta_event.lifecycle', msg)
-            break
-          case 'heartbeat':
-            this._emitter.emit('meta_event.heartbeat', msg)
-            break
-          default:
-            break
-        }
-        break
-      default:
-        break
-    }
-  }
 }
 
 module.exports = {

@@ -90,7 +90,7 @@ module.exports = class Eventbus {
    * @param {function} cb 回调函数
    */
   once (type, cb) {
-    const func = (msg) => {
+    const func = msg => {
       cb(msg)
       this.off(type, func)
     }
@@ -113,27 +113,169 @@ module.exports = class Eventbus {
   }
 
   /**
-   * 上报事件并执行所有监听该事件的回调
+   * 上报 CQ 事件
+   * @param {Object} msg
+   */
+  eventEmit (msg) {
+    switch (msg.post_type) {
+      case 'message':
+        switch (msg.message_type) {
+          case 'private':
+            switch (msg.sub_type) {
+              case 'friend':
+                this._emit('message.private.friend', msg, { quick: true })
+                break
+              case 'group':
+                this._emit('message.private.group', msg, { quick: true })
+                break
+              case 'other':
+                this._emit('message.private.other', msg, { quick: true })
+                break
+              default:
+                break
+            }
+            break
+          case 'group':
+            switch (msg.sub_type) {
+              case 'normal':
+                this._emit('message.group.normal', msg, { quick: true })
+                break
+              case 'anonymous':
+                this._emit('message.group.anonymous', msg, { quick: true })
+                break
+              case 'notice':
+                this._emit('message.group.notice', msg, { quick: true })
+                break
+              default:
+                break
+            }
+            break
+          default:
+            break
+        }
+        break
+      case 'notice':
+        switch (msg.notice_type) {
+          case 'group_upload':
+            this._emit('notice.group_upload', msg)
+            break
+          case 'group_admin':
+            switch (msg.sub_type) {
+              case 'set':
+                this._emit('notice.group_admin.set', msg)
+                break
+              case 'unset':
+                this._emit('notice.group_admin.unset', msg)
+                break
+              default:
+                break
+            }
+            break
+          case 'group_decrease':
+            switch (msg.sub_type) {
+              case 'leave':
+                this._emit('notice.group_decrease.leave', msg)
+                break
+              case 'kick':
+                this._emit('notice.group_decrease.kick', msg)
+                break
+              case 'kick_me':
+                this._emit('notice.group_decrease.kick_me', msg)
+                break
+              default:
+                break
+            }
+            break
+          case 'group_increase':
+            switch (msg.sub_type) {
+              case 'approve':
+                this._emit('notice.group_increase.approve', msg)
+                break
+              case 'invite':
+                this._emit('notice.group_increase.invite', msg)
+                break
+              default:
+                break
+            }
+            break
+          case 'group_ban':
+            switch (msg.sub_type) {
+              case 'ban':
+                this._emit('notice.group_ban.ban', msg)
+                break
+              case 'lift_ban':
+                this._emit('notice.group_ban.lift_ban', msg)
+                break
+              default:
+                break
+            }
+            break
+          case 'group_recall':
+            this._emit('notice.group_recall', msg)
+            break
+          case 'friend_recall':
+            this._emit('notice.friend_recall', msg)
+            break
+          default:
+            break
+        }
+        break
+      case 'request':
+        switch (msg.request_type) {
+          case 'friend':
+            this._emit('request.friend', msg, { quick: true })
+            break
+          case 'group':
+            switch (msg.sub_type) {
+              case 'add':
+                this._emit('request.group.add', msg, { quick: true })
+                break
+              case 'invite':
+                this._emit('request.group.invite', msg, { quick: true })
+                break
+              default:
+                break
+            }
+            break
+          default:
+            break
+        }
+        break
+      case 'meta_event':
+        switch (msg.meta_event_type) {
+          case 'lifecycle':
+            this._emit('meta_event.lifecycle', msg)
+            break
+          case 'heartbeat':
+            this._emit('meta_event.heartbeat', msg)
+            break
+          default:
+            break
+        }
+        break
+      default:
+        break
+    }
+  }
+
+  /**
+   * 处理上报事件
    * @param {string} type 事件类型
    * @param {object} msg 事件数据对象
    * @param {object|undefined} [extra=undefined] 额外参数
    */
-  async emit (type, msg, extra) {
+  async _emit (type, msg, extra) {
     const queue = []
     for (let hierarchy = type.split('.'); hierarchy.length > 0; hierarchy.pop()) {
       const currentQueue = this._getlisteners(hierarchy.join('.'))
-      if (currentQueue && currentQueue.length > 0) {
-        queue.push(...currentQueue)
-      }
+      if (currentQueue && currentQueue.length > 0) { queue.push(...currentQueue) }
     }
 
     // 判断事件是否可以快速操作
     if (extra && extra.quick) {
-      msg.$send = (data) => this._cqbot.call('.handle_quick_operation', { context: msg, operation: data })
+      msg.$send = data => this._cqbot.call('.handle_quick_operation', { context: msg, operation: data })
     }
 
-    for (const handler of queue) {
-      await handler(msg)
-    }
+    for (const handler of queue) { await handler(msg) }
   }
 }
