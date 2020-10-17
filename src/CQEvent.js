@@ -3,6 +3,8 @@ const $get = require('lodash.get')
 module.exports = class Eventbus {
   constructor (cqbot) {
     this._cqbot = cqbot
+    this._middleware = new Map() // 存储注册的中间件
+    this._cbMiddleware = new WeakMap() // 存储回调函数的中间件
     this._eventType = {
       message: {
         '': [],
@@ -76,11 +78,13 @@ module.exports = class Eventbus {
    * 监听事件
    * @param {string} type 事件类型
    * @param {function} cb 回调函数
+   * @param {string|Array|null} middleware 中间件
    */
-  on (type, cb) {
+  on (type, cb, middleware = null) {
     const queue = this._getlisteners(type)
     if (queue) {
       queue.push(cb)
+      this._cbMiddleware.set(cb, middleware)
     }
   }
 
@@ -88,13 +92,14 @@ module.exports = class Eventbus {
    * 监听事件（一次性）
    * @param {string} type 事件类型
    * @param {function} cb 回调函数
+   * @param {string|Array|null} middleware 中间件
    */
-  once (type, cb) {
+  once (type, cb, middleware = null) {
     const func = msg => {
       cb(msg)
       this.off(type, func)
     }
-    this.on(type, func)
+    this.on(type, func, middleware)
   }
 
   /**
@@ -108,28 +113,36 @@ module.exports = class Eventbus {
       const index = queue.indexOf(cb)
       if (index > -1) {
         queue.splice(index, 1)
+        this._cbMiddleware.delete(cb)
       }
     }
   }
 
   /**
+   * 注册中间件
+   * @param {string} name 中间件名称
+   * @param {function} func 中间件函数
+   */
+  middleware (name, func) { this._middleware.set(name, func) }
+
+  /**
    * 上报 CQ 事件
    * @param {Object} msg
    */
-  eventEmit (msg) {
+  emit (msg) {
     switch (msg.post_type) {
       case 'message':
         switch (msg.message_type) {
           case 'private':
             switch (msg.sub_type) {
               case 'friend':
-                this._emit('message.private.friend', msg, { quick: true })
+                this._handleEmit('message.private.friend', msg, { quick: true })
                 break
               case 'group':
-                this._emit('message.private.group', msg, { quick: true })
+                this._handleEmit('message.private.group', msg, { quick: true })
                 break
               case 'other':
-                this._emit('message.private.other', msg, { quick: true })
+                this._handleEmit('message.private.other', msg, { quick: true })
                 break
               default:
                 break
@@ -138,13 +151,13 @@ module.exports = class Eventbus {
           case 'group':
             switch (msg.sub_type) {
               case 'normal':
-                this._emit('message.group.normal', msg, { quick: true })
+                this._handleEmit('message.group.normal', msg, { quick: true })
                 break
               case 'anonymous':
-                this._emit('message.group.anonymous', msg, { quick: true })
+                this._handleEmit('message.group.anonymous', msg, { quick: true })
                 break
               case 'notice':
-                this._emit('message.group.notice', msg, { quick: true })
+                this._handleEmit('message.group.notice', msg, { quick: true })
                 break
               default:
                 break
@@ -157,15 +170,15 @@ module.exports = class Eventbus {
       case 'notice':
         switch (msg.notice_type) {
           case 'group_upload':
-            this._emit('notice.group_upload', msg)
+            this._handleEmit('notice.group_upload', msg)
             break
           case 'group_admin':
             switch (msg.sub_type) {
               case 'set':
-                this._emit('notice.group_admin.set', msg)
+                this._handleEmit('notice.group_admin.set', msg)
                 break
               case 'unset':
-                this._emit('notice.group_admin.unset', msg)
+                this._handleEmit('notice.group_admin.unset', msg)
                 break
               default:
                 break
@@ -174,13 +187,13 @@ module.exports = class Eventbus {
           case 'group_decrease':
             switch (msg.sub_type) {
               case 'leave':
-                this._emit('notice.group_decrease.leave', msg)
+                this._handleEmit('notice.group_decrease.leave', msg)
                 break
               case 'kick':
-                this._emit('notice.group_decrease.kick', msg)
+                this._handleEmit('notice.group_decrease.kick', msg)
                 break
               case 'kick_me':
-                this._emit('notice.group_decrease.kick_me', msg)
+                this._handleEmit('notice.group_decrease.kick_me', msg)
                 break
               default:
                 break
@@ -189,10 +202,10 @@ module.exports = class Eventbus {
           case 'group_increase':
             switch (msg.sub_type) {
               case 'approve':
-                this._emit('notice.group_increase.approve', msg)
+                this._handleEmit('notice.group_increase.approve', msg)
                 break
               case 'invite':
-                this._emit('notice.group_increase.invite', msg)
+                this._handleEmit('notice.group_increase.invite', msg)
                 break
               default:
                 break
@@ -201,20 +214,20 @@ module.exports = class Eventbus {
           case 'group_ban':
             switch (msg.sub_type) {
               case 'ban':
-                this._emit('notice.group_ban.ban', msg)
+                this._handleEmit('notice.group_ban.ban', msg)
                 break
               case 'lift_ban':
-                this._emit('notice.group_ban.lift_ban', msg)
+                this._handleEmit('notice.group_ban.lift_ban', msg)
                 break
               default:
                 break
             }
             break
           case 'group_recall':
-            this._emit('notice.group_recall', msg)
+            this._handleEmit('notice.group_recall', msg)
             break
           case 'friend_recall':
-            this._emit('notice.friend_recall', msg)
+            this._handleEmit('notice.friend_recall', msg)
             break
           default:
             break
@@ -223,15 +236,15 @@ module.exports = class Eventbus {
       case 'request':
         switch (msg.request_type) {
           case 'friend':
-            this._emit('request.friend', msg, { quick: true })
+            this._handleEmit('request.friend', msg, { quick: true })
             break
           case 'group':
             switch (msg.sub_type) {
               case 'add':
-                this._emit('request.group.add', msg, { quick: true })
+                this._handleEmit('request.group.add', msg, { quick: true })
                 break
               case 'invite':
-                this._emit('request.group.invite', msg, { quick: true })
+                this._handleEmit('request.group.invite', msg, { quick: true })
                 break
               default:
                 break
@@ -244,10 +257,10 @@ module.exports = class Eventbus {
       case 'meta_event':
         switch (msg.meta_event_type) {
           case 'lifecycle':
-            this._emit('meta_event.lifecycle', msg)
+            this._handleEmit('meta_event.lifecycle', msg)
             break
           case 'heartbeat':
-            this._emit('meta_event.heartbeat', msg)
+            this._handleEmit('meta_event.heartbeat', msg)
             break
           default:
             break
@@ -259,12 +272,42 @@ module.exports = class Eventbus {
   }
 
   /**
+   * 处理中间件
+   * @param {string|string[]} middleware 中间件
+   * @param {function} cb 回调函数
+   */
+  _handleMiddleware (middleware, cb) {
+    const func = []
+    if (typeof middleware === 'string') { middleware = [middleware] }
+    for (const mw of middleware) {
+      const index = mw.indexOf(':')
+      if (index === -1) {
+        func.push(this._middleware.get(mw))
+      } else {
+        const name = mw.slice(0, index)
+        const param = mw.slice(index + 1).split(',')
+        func.push(this._middleware.get(name)(...param))
+      }
+    }
+    func.push(cb)
+
+    return ctx => {
+      const length = func.length
+      function next (i) {
+        if (i !== length) { return func[i](ctx, next.bind(null, i + 1)) }
+      }
+
+      return next(0)
+    }
+  }
+
+  /**
    * 处理上报事件
    * @param {string} type 事件类型
    * @param {object} msg 事件数据对象
    * @param {object|undefined} [extra=undefined] 额外参数
    */
-  async _emit (type, msg, extra) {
+  async _handleEmit (type, msg, extra) {
     const queue = []
     for (let hierarchy = type.split('.'); hierarchy.length > 0; hierarchy.pop()) {
       const currentQueue = this._getlisteners(hierarchy.join('.'))
@@ -276,6 +319,13 @@ module.exports = class Eventbus {
       msg.$send = data => this._cqbot.call('.handle_quick_operation', { context: msg, operation: data })
     }
 
-    for (const handler of queue) { await handler(msg) }
+    for (const cb of queue) {
+      const middleware = this._cbMiddleware.get(cb)
+      if (!middleware) {
+        await cb(msg)
+      } else {
+        await this._handleMiddleware(middleware, cb)(msg)
+      }
+    }
   }
 }

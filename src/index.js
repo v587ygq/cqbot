@@ -2,6 +2,7 @@ const { nanoid } = require('nanoid')
 const ws = require('ws')
 
 const CQEvent = require('./CQEvent')
+const builtInMiddleware = require('./middleware')
 
 class CQBot {
   constructor ({
@@ -27,7 +28,7 @@ class CQBot {
     })
 
     this._eventServer.on('connection', ws => {
-      ws.on('message', msg => { this._emitter.eventEmit(JSON.parse(msg)) })
+      ws.on('message', msg => { this._emitter.emit(JSON.parse(msg)) })
     })
   }
 
@@ -36,6 +37,8 @@ class CQBot {
    * @param {Server} server
    */
   start (server) {
+    Object.keys(builtInMiddleware).forEach(key => this.middleware(key, builtInMiddleware[key])) // 注册内置中间件
+
     server.on('upgrade', (req, socket, head) => {
       if (!this._token || req.headers.authorization === `Token ${this._token}`) { // 鉴权
         if (this._apiServer.shouldHandle(req) && req.headers['x-client-role'] === 'API') {
@@ -86,8 +89,9 @@ class CQBot {
    * 监听 CQ 事件
    * @param {string} type 事件类型
    * @param {function} cb 回调函数
+   * @param {string|Array|null} middleware 中间件
    */
-  on (type, cb) { this._emitter.on(type, cb) }
+  on (type, cb, middleware) { this._emitter.on(type, cb, middleware) }
 
   /**
    * 监听 CQ 事件（一次性）
@@ -102,6 +106,13 @@ class CQBot {
    * @param {function} cb 回调函数
    */
   off (type, cb) { this._emitter.off(type, cb) }
+
+  /**
+   * 注册中间件
+   * @param {string} name 中间件名称
+   * @param {function} func 中间件函数
+   */
+  middleware (name, func) { this._emitter.middleware(name, func) }
 }
 
 module.exports = {
