@@ -47,7 +47,7 @@ module.exports = {
     'no-lone-blocks': 2,
     'no-multi-spaces': 2,
     'no-multi-str': 2,
-    'no-multiple-empty-lines': [2, { max: 1, maxBOF: 0 }],
+    'no-multiple-empty-lines': [2, { max: 1, maxBOF: 0, maxEOF: 0 }],
     'no-new': 2,
     'no-new-func': 2,
     'no-new-object': 2,
