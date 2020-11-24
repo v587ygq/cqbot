@@ -284,18 +284,14 @@ module.exports = class Eventbus {
       if (index === -1) {
         func.push(this._middleware.get(mw))
       } else {
-        const name = mw.slice(0, index)
-        const param = mw.slice(index + 1).split(',')
-        func.push(this._middleware.get(name)(...param))
+        func.push(this._middleware.get(mw.slice(0, index))(...mw.slice(index + 1).split(',')))
       }
     }
     func.push(cb)
 
-    return ctx => {
+    return msg => {
       const length = func.length
-      function next (i) {
-        if (i !== length) { return func[i](ctx, next.bind(null, i + 1)) }
-      }
+      const next = i => i !== length && func[i](msg, next.bind(null, i + 1))
 
       return next(0)
     }

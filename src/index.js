@@ -4,7 +4,7 @@ const ws = require('ws')
 const CQEvent = require('./CQEvent')
 const builtInMiddleware = require('./middleware')
 
-class CQBot {
+module.exports = class CQBot {
   constructor ({
     token = null, // 用于 CQ 客户端验证
     timeout = 5000 // API 超时时间，单位毫秒
@@ -97,8 +97,9 @@ class CQBot {
    * 监听 CQ 事件（一次性）
    * @param {string} type 事件类型
    * @param {function} cb 回调函数
+   * @param {string|Array|null} middleware 中间件
    */
-  once (type, cb) { this._emitter.once(type, cb) }
+  once (type, cb, middleware) { this._emitter.once(type, cb, middleware) }
 
   /**
    * 取消监听 CQ 事件
@@ -113,9 +114,4 @@ class CQBot {
    * @param {function} func 中间件函数
    */
   middleware (name, func) { this._emitter.middleware(name, func) }
-}
-
-module.exports = {
-  CQBot,
-  ...require('./message')
 }
